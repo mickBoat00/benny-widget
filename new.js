@@ -7,7 +7,7 @@
     button.style.width = '60px';
     button.style.height = '60px';
     button.style.borderRadius = '50%';
-    button.style.backgroundImage = 'url("./benny2.png")';
+    button.style.backgroundImage = 'url("https://mickboat00.github.io/benny-widget/benny2.png")';
     button.style.backgroundSize = 'cover';
     button.style.backgroundPosition = 'center';
     button.style.cursor = 'pointer';
@@ -110,7 +110,7 @@
     messagesArea.style.padding = '4px 10px';
     messagesArea.style.display = 'flex';
     messagesArea.style.flexDirection = 'column';
-    messagesArea.style.backgroundImage = 'url("./chat-bg.svg")';
+    messagesArea.style.backgroundImage = 'url("https://mickboat00.github.io/benny-widget/chat-bg.svg")';
     messagesArea.style.backgroundSize = 'cover';
     messagesArea.style.backgroundPosition = 'center';
     // messagesArea.style.backgroundColor = '#f9f9f9';
@@ -128,7 +128,7 @@
 
     // Create the avatar/image element
     const avatarImage = document.createElement('img');
-    avatarImage.src = './benny2.png'; // Replace with your actual image source
+    avatarImage.src = 'https://mickboat00.github.io/benny-widget/benny2.png'; // Replace with your actual image source
     avatarImage.alt = 'Assistant Avatar';
     avatarImage.style.width = '30px';
     avatarImage.style.height = '30px';
@@ -302,7 +302,7 @@
         responseDiv.style.padding = '8px';
 
         const responseAvatar = document.createElement('img');
-        responseAvatar.src = './benny2.png';
+        responseAvatar.src = 'https://mickboat00.github.io/benny-widget/benny2.png';
         responseAvatar.alt = 'Benny Avatar';
         responseAvatar.style.width = '30px';
         responseAvatar.style.height = '30px';
