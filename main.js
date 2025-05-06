@@ -126,10 +126,58 @@
         addMessage(text, true);
         textInput.value = '';
         
-        // Simulate reply after a short delay
-        setTimeout(() => {
-          addMessage('Thanks for your message! Our team will get back to you soon.', false);
-        }, 1000);
+        // Create response message container but leave it empty
+        const responseDiv = document.createElement('div');
+        responseDiv.style.alignSelf = 'flex-start';
+        responseDiv.style.backgroundColor = '#f1f1f1';
+        responseDiv.style.color = '#000';
+        responseDiv.style.padding = '8px 12px';
+        responseDiv.style.borderRadius = '18px';
+        responseDiv.style.maxWidth = '70%';
+        responseDiv.innerText = ''; // Start empty
+        messagesArea.appendChild(responseDiv);
+        
+        // Show typing indicator
+        responseDiv.innerText = 'Typing...';
+        
+        // Fetch streaming response from API
+        const url = new URL('http://bennychat-env-staging-v3.eba-4x2h6mpd.us-east-1.elasticbeanstalk.com/get_chatbot_response/');
+        url.searchParams.append('input_message', text);
+        url.searchParams.append('module', 'general');
+        
+        fetch(url, {
+          method: 'GET'
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          responseDiv.innerText = ''; // Clear typing indicator
+          
+          // Read the stream
+          function readStream() {
+            return reader.read().then(({ done, value }) => {
+              if (done) {
+                return;
+              }
+              
+              const chunk = decoder.decode(value, { stream: true });
+              responseDiv.innerText += chunk;
+              messagesArea.scrollTop = messagesArea.scrollHeight;
+              
+              return readStream();
+            });
+          }
+          
+          return readStream();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          responseDiv.innerText = 'Sorry, there was an error connecting to the chat service.';
+        });
       }
     });
   
