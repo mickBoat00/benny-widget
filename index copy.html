@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+}
+
+body {
+  background-color: #0f1b2a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.chat-container {
+  width: 100%;
+  max-width: 420px;
+  height: 80vh;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.header-left,
+.header-right {
+  flex: 1;
+}
+
+.header-center {
+  flex: 8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-center h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.badge {
+  background-color: #f0f0f0;
+  border-radius: 16px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #f9f9f9;
+}
+
+.message {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message-content {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.user .message-content {
+  background-color: #f0f0f0;
+  color: #333;
+  border-radius: 18px 18px 0 18px;
+}
+
+.bot {
+  display: flex;
+  gap: 8px;
+}
+
+.bot-avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #6c8dff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.bot .message-content {
+  background-color: white;
+  color: #333;
+  border-radius: 0 18px 18px 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  margin-left: 44px;
+}
+
+.feedback-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+}
+
+.feedback-button:hover {
+  color: #333;
+}
+
+.chat-input-container {
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.input-wrapper {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+#chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+#send-button {
+  background-color: #e6e6e6;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#send-button:hover {
+  background-color: #d9d9d9;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin-top: 12px;
+}
+
+.disclaimer a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.chat-bubble {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #6c8dff, #5865f2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+    </style>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+        const chatMessages = document.getElementById("chat-messages")
+        const chatInput = document.getElementById("chat-input")
+        const sendButton = document.getElementById("send-button")
+        const chatBubble = document.getElementById("chat-bubble")
+        const chatContainer = document.getElementById("chat-container")
+
+        // Sample responses for the AWS-style bot
+        const botResponses = [
+            "Sorry, I can only answer questions related to AWS products and services.",
+            "Thank you for your feedback.",
+            "AWS offers a broad set of global cloud-based products.",
+            "You can get started with AWS by creating a free tier account.",
+            "EC2 provides secure and resizable compute capacity in the cloud.",
+        ]
+
+        // Function to add a message to the chat
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement("div")
+            messageDiv.className = isUser ? "message user" : "message bot"
+
+            if (!isUser) {
+            // Bot message with avatar
+            const avatarDiv = document.createElement("div")
+            avatarDiv.className = "bot-avatar"
+            avatarDiv.innerHTML = '<i class="fa-solid fa-sparkles"></i>'
+
+            const messageContent = document.createElement("div")
+            messageContent.className = "message-content"
+            messageContent.textContent = content
+
+            messageDiv.appendChild(avatarDiv)
+            messageDiv.appendChild(messageContent)
+
+            // Add feedback buttons for bot messages
+            setTimeout(() => {
+                const feedbackDiv = document.createElement("div")
+                feedbackDiv.className = "feedback-buttons"
+
+                const thumbsUpButton = document.createElement("button")
+                thumbsUpButton.className = "feedback-button"
+                thumbsUpButton.innerHTML = '<i class="fa-solid fa-thumbs-up"></i>'
+                thumbsUpButton.addEventListener("click", function () {
+                this.style.color = "#0066cc"
+                addMessage("Thank you for your feedback.", false)
+                })
+
+                const thumbsDownButton = document.createElement("button")
+                thumbsDownButton.className = "feedback-button"
+                thumbsDownButton.innerHTML = '<i class="fa-solid fa-thumbs-down"></i>'
+                thumbsDownButton.addEventListener("click", function () {
+                this.style.color = "#0066cc"
+                addMessage("Thank you for your feedback.", false)
+                })
+
+                feedbackDiv.appendChild(thumbsUpButton)
+                feedbackDiv.appendChild(thumbsDownButton)
+
+                chatMessages.appendChild(feedbackDiv)
+                chatMessages.scrollTop = chatMessages.scrollHeight
+            }, 500)
+            } else {
+            // User message
+            const messageContent = document.createElement("div")
+            messageContent.className = "message-content"
+            messageContent.textContent = content
+
+            messageDiv.appendChild(messageContent)
+            }
+
+            chatMessages.appendChild(messageDiv)
+            chatMessages.scrollTop = chatMessages.scrollHeight
+        }
+
+        // Function to handle sending a message
+        function sendMessage() {
+            const message = chatInput.value.trim()
+            if (message) {
+            addMessage(message, true)
+            chatInput.value = ""
+
+            // Simulate bot typing
+            setTimeout(() => {
+                // Choose a random response or the default one
+                let response
+                if (
+                message.toLowerCase().includes("aws") ||
+                message.toLowerCase().includes("amazon") ||
+                message.toLowerCase().includes("cloud")
+                ) {
+                response = botResponses[Math.floor(Math.random() * 3) + 2]
+                } else {
+                response = botResponses[0]
+                }
+                addMessage(response, false)
+            }, 1000)
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener("click", sendMessage)
+
+        chatInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+            sendMessage()
+            }
+        })
+
+        chatBubble.addEventListener("click", () => {
+            chatContainer.style.display = "flex"
+            chatBubble.style.display = "none"
+        })
+
+        // Add initial message
+        setTimeout(() => {
+            addMessage("Hello! How can I help you with AWS today?", false)
+        }, 500)
+        })
+
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+          <div class="header-left">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </div>
+          <div class="header-center">
+            <h2>Ask AWS</h2>
+            <div class="badge">
+              <span>built-in</span>
+            </div>
+          </div>
+          <div class="header-right">
+            <i class="fa-solid fa-minus"></i>
+          </div>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+          <!-- Messages will be added here dynamically -->
+        </div>
+        
+        <div class="chat-input-container">
+          <div class="input-wrapper">
+            <input type="text" id="chat-input" placeholder="Ask a question">
+            <button id="send-button">
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+          <div class="disclaimer">
+            By chatting, you agree to this <a href="#">disclaimer</a>.
+          </div>
+        </div>
+      </div>
+    
+      <div class="chat-bubble" id="chat-bubble">
+        <i class="fa-solid fa-comment"></i>
+      </div>
+
+
+    <!-- <script src="https://mickboat00.github.io/benny-widget/main.js"></script> -->
+    <!-- <script src="main.js"></script> -->
+</body>
+</html>

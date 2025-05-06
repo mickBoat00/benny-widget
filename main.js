@@ -7,24 +7,24 @@
     button.style.width = '60px';
     button.style.height = '60px';
     button.style.borderRadius = '50%';
-    button.style.backgroundColor = '#007BFF';
-    button.style.color = '#fff';
-    button.style.display = 'flex';
-    button.style.alignItems = 'center';
-    button.style.justifyContent = 'center';
+    button.style.backgroundImage = 'url("./benny2.png")';
+    button.style.backgroundSize = 'cover';
+    button.style.backgroundPosition = 'center';
     button.style.cursor = 'pointer';
     button.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
     button.style.zIndex = '9999';
-    button.innerText = '💬';
+
   
     // Create chat interface
     const chatInterface = document.createElement('div');
     chatInterface.style.position = 'fixed';
     chatInterface.style.bottom = '90px';
     chatInterface.style.right = '20px';
-    chatInterface.style.width = '300px';
-    chatInterface.style.height = '400px';
-    chatInterface.style.background = '#fff';
+    chatInterface.style.width = '400px';
+    chatInterface.style.height = '500px';
+    chatInterface.style.backgroundImage = 'url("./chat-bg.svg")';
+    chatInterface.style.backgroundSize = 'cover';
+    chatInterface.style.backgroundPosition = 'center';
     chatInterface.style.border = '1px solid #ccc';
     chatInterface.style.borderRadius = '8px';
     chatInterface.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
@@ -37,7 +37,7 @@
     // Create chat header
     const chatHeader = document.createElement('div');
     chatHeader.style.padding = '10px';
-    chatHeader.style.backgroundColor = '#007BFF';
+    chatHeader.style.backgroundColor = '#112a52';
     chatHeader.style.color = '#fff';
     chatHeader.style.display = 'flex';
     chatHeader.style.justifyContent = 'space-between';
@@ -46,7 +46,7 @@
     chatHeader.style.borderTopRightRadius = '8px';
   
     const headerTitle = document.createElement('div');
-    headerTitle.innerText = 'Chat Support';
+    headerTitle.innerText = 'Benny';
     headerTitle.style.fontWeight = 'bold';
   
     const closeButton = document.createElement('div');
@@ -73,11 +73,12 @@
     // Add a welcome message
     const welcomeMessage = document.createElement('div');
     welcomeMessage.style.alignSelf = 'flex-start';
-    welcomeMessage.style.backgroundColor = '#f1f1f1';
+    welcomeMessage.style.backgroundColor = '#e7f3fe';
     welcomeMessage.style.padding = '8px 12px';
-    welcomeMessage.style.borderRadius = '18px';
+    welcomeMessage.style.borderRadius = '8px';
     welcomeMessage.style.maxWidth = '70%';
-    welcomeMessage.innerText = 'Hello! How can I help you today?';
+    welcomeMessage.style.color = '#1F2937';
+    welcomeMessage.innerText = 'Hi there! How can I help you today?';
     messagesArea.appendChild(welcomeMessage);
   
     // Create input area
@@ -89,7 +90,7 @@
   
     const textInput = document.createElement('input');
     textInput.type = 'text';
-    textInput.placeholder = 'Type your message...';
+    textInput.placeholder = 'What would you like to know?';
     textInput.style.flex = '1';
     textInput.style.padding = '8px';
     textInput.style.border = '1px solid #ddd';
@@ -109,10 +110,10 @@
     function addMessage(text, isSender) {
       const messageDiv = document.createElement('div');
       messageDiv.style.alignSelf = isSender ? 'flex-end' : 'flex-start';
-      messageDiv.style.backgroundColor = isSender ? '#007BFF' : '#f1f1f1';
-      messageDiv.style.color = isSender ? '#fff' : '#000';
+      messageDiv.style.backgroundColor = isSender ? '#AACFBE' : '#e7f3fe';
+      messageDiv.style.color = '#1F2937';
       messageDiv.style.padding = '8px 12px';
-      messageDiv.style.borderRadius = '18px';
+      messageDiv.style.borderRadius = '8px';
       messageDiv.style.maxWidth = '70%';
       messageDiv.innerText = text;
       messagesArea.appendChild(messageDiv);
@@ -129,12 +130,12 @@
         // Create response message container but leave it empty
         const responseDiv = document.createElement('div');
         responseDiv.style.alignSelf = 'flex-start';
-        responseDiv.style.backgroundColor = '#f1f1f1';
-        responseDiv.style.color = '#000';
+        responseDiv.style.backgroundColor = '#e7f3fe';
+        responseDiv.style.color = '#1F2937';
         responseDiv.style.padding = '8px 12px';
-        responseDiv.style.borderRadius = '18px';
+        responseDiv.style.borderRadius = '8px';
         responseDiv.style.maxWidth = '70%';
-        responseDiv.innerText = ''; // Start empty
+        responseDiv.innerText = '';
         messagesArea.appendChild(responseDiv);
         
         // Show typing indicator
@@ -155,9 +156,11 @@
           
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
-          responseDiv.innerText = ''; // Clear typing indicator
+          responseDiv.innerText = '';
+          let receivedText = '';
+          let messageId = null; 
           
-          // Read the stream
+          
           function readStream() {
             return reader.read().then(({ done, value }) => {
               if (done) {
@@ -165,8 +168,17 @@
               }
               
               const chunk = decoder.decode(value, { stream: true });
-              responseDiv.innerText += chunk;
-              messagesArea.scrollTop = messagesArea.scrollHeight;
+              receivedText += chunk;
+            //   responseDiv.innerText += chunk;
+              if (!messageId) {
+                const idMatch = receivedText.match(/MESSAGE_ID:(\d+)/);
+                if (idMatch) {
+                    messageId = idMatch[1];
+                    receivedText = receivedText.replace(/MESSAGE_ID:\d+\n/, "");
+                }
+              }
+
+              responseDiv.innerHTML = receivedText;
               
               return readStream();
             });
