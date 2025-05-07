@@ -307,12 +307,18 @@
       responseDiv.appendChild(responseMessage);
       messagesArea.appendChild(responseDiv);
 
-      responseMessage.innerHTML = `<div><p>Typing...<p></div>`;
+      responseMessage.innerHTML = `<div><p>Thinking...<p></div>`;
 
-      const url = new URL('http://bennychat-env-staging-v3.eba-4x2h6mpd.us-east-1.elasticbeanstalk.com/get_chatbot_response/');
+
+      let chatId = localStorage.getItem('chatId');
+      console.log('chatId', chatId)
+      // let chatId = null
+
+      // const url = new URL('http://bennychat-env-staging-v3.eba-4x2h6mpd.us-east-1.elasticbeanstalk.com/get_chatbot_response/');
+      const url = new URL('http://localhost:8000/get_chatbot_response/');
       url.searchParams.append('input_message', text);
       url.searchParams.append('module', 'general');
-
+      if (chatId) url.searchParams.append('chat_id', chatId); 
 
       fetch(url, {
         method: 'GET'
@@ -336,7 +342,18 @@
             
             const chunk = decoder.decode(value, { stream: true });
             receivedText += chunk;
-          //   responseDiv.innerText += chunk;
+            console.log(chunk)
+            
+            if (!chatId && receivedText.includes('\n')) {
+              const chatIdMatch = receivedText.match(/CHAT_ID:([^\n]+)/);
+              if (chatIdMatch) {
+                chatId = chatIdMatch[1].trim();
+                receivedText = receivedText.replace(/CHAT_ID:[^\n]+\n/, "");
+                localStorage.setItem('chatId', chatId);
+              }
+            }
+            
+
             if (!messageId) {
               const idMatch = receivedText.match(/MESSAGE_ID:(\d+)/);
               if (idMatch) {
@@ -383,7 +400,7 @@
       button.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
       button.style.transform = 'translateY(0) scale(1)';
     } else {
-
+      localStorage.removeItem('chatId');
       button.style.animation = 'bounce 1s infinite alternate ease-in-out';
       startGlowEffect();
     }
@@ -392,6 +409,7 @@
 
   closeButton.addEventListener('click', () => {
     chatInterface.style.display = 'none';
+    localStorage.removeItem('chatId');
     button.style.animation = 'bounce 1s infinite alternate ease-in-out';
     startGlowEffect();
   });
