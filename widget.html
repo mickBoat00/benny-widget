@@ -345,6 +345,78 @@
                     responseMessage.style.wordWrap = 'break-word';
                     responseMessage.style.overflow = 'hidden';
 
+                    // Create a container for the feedback buttons
+                    const feedbackContainer = document.createElement('div');
+                    feedbackContainer.style.display = 'flex';
+                    feedbackContainer.style.alignItems = 'center';
+                    feedbackContainer.style.gap = '12px';
+                    feedbackContainer.style.marginTop = '8px';
+                    feedbackContainer.style.padding = '4px 0';
+
+                    const thumbsUpButton = document.createElement('button');
+                    thumbsUpButton.style.background = 'none';
+                    thumbsUpButton.style.border = 'none';
+                    thumbsUpButton.style.cursor = 'pointer';
+                    thumbsUpButton.style.padding = '4px';
+                    thumbsUpButton.style.borderRadius = '4px';
+                    thumbsUpButton.style.transition = 'background-color 0.2s';
+                    thumbsUpButton.title = 'Helpful';
+                    thumbsUpButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 10v12"></path>
+                        <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"></path>
+                    </svg>
+                    `;
+                    thumbsUpButton.addEventListener('mouseover', () => {
+                    thumbsUpButton.style.backgroundColor = '#E5E7EB';
+                    });
+                    thumbsUpButton.addEventListener('mouseout', () => {
+                    thumbsUpButton.style.backgroundColor = 'transparent';
+                    });
+                    thumbsUpButton.addEventListener('click', () => {
+                    // Handle thumbs up feedback
+                    thumbsUpButton.style.color = '#3B82F6';
+                    thumbsDownButton.style.color = 'currentColor';
+                    console.log('Thumbs up for message:', messageId);
+                    // You can add feedback submission logic here
+                    });
+
+                    // Create thumbs down button with SVG
+                    const thumbsDownButton = document.createElement('button');
+                    thumbsDownButton.style.background = 'none';
+                    thumbsDownButton.style.border = 'none';
+                    thumbsDownButton.style.cursor = 'pointer';
+                    thumbsDownButton.style.padding = '4px';
+                    thumbsDownButton.style.borderRadius = '4px';
+                    thumbsDownButton.style.transition = 'background-color 0.2s';
+                    thumbsDownButton.title = 'Not helpful';
+                    thumbsDownButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 14V2"></path>
+                        <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"></path>
+                    </svg>
+                    `;
+                    thumbsDownButton.addEventListener('mouseover', () => {
+                    thumbsDownButton.style.backgroundColor = '#E5E7EB';
+                    });
+                    thumbsDownButton.addEventListener('mouseout', () => {
+                    thumbsDownButton.style.backgroundColor = 'transparent';
+                    });
+                    thumbsDownButton.addEventListener('click', () => {
+                    // Handle thumbs down feedback
+                    thumbsDownButton.style.color = '#EF4444';
+                    thumbsUpButton.style.color = 'currentColor';
+                    console.log('Thumbs down for message:', messageId);
+                    // You can add feedback submission logic here
+                    });
+
+                    // Add buttons to the feedback container
+                    feedbackContainer.appendChild(thumbsUpButton);
+                    feedbackContainer.appendChild(thumbsDownButton);
+
+                    // Add feedback container to the response message
+                    responseMessage.appendChild(feedbackContainer);
+
                     responseDiv.appendChild(responseAvatar);
                     responseDiv.appendChild(responseMessage);
                     messagesArea.appendChild(responseDiv);
@@ -377,6 +449,13 @@
                         function readStream() {
                             return reader.read().then(({ done, value }) => {
                                 if (done) {
+                                    // When the stream is done, add the feedback buttons
+                                    const messageContent = document.createElement('div');
+                                    messageContent.innerHTML = receivedText;
+                                    
+                                    responseMessage.innerHTML = ''; // Clear the existing content
+                                    responseMessage.appendChild(messageContent);
+                                    responseMessage.appendChild(feedbackContainer);
                                     return;
                                 }
                                 
@@ -401,6 +480,7 @@
                                     }
                                 }
 
+                                // Update the message content, but keep the feedback container separate
                                 responseMessage.innerHTML = receivedText;
                                 
                                 return readStream();
@@ -411,7 +491,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        responseDiv.innerText = 'Sorry, there was an error connecting to the chat service.';
+                        responseMessage.innerText = 'Sorry, there was an error connecting to the chat service.';
                     });
                 }
             });
